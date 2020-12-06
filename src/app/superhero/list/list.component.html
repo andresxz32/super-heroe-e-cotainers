@@ -1,0 +1,36 @@
+<ng-template #loading>
+    <div class="loading">Loading superhero...</div>
+</ng-template>
+
+<div class="row" *ngIf="(superHeroes$ | async) as superHeroes; else loading">
+    <div class="col-6 col-md-3" *ngFor="let superHero of superHeroes; index as index; trackBy: trackByFunction; ">
+        <div class="card">
+            <!--
+                Un enlace solo puede contener como valor texto en su etiqueta
+                debido a que esto afecto los lectores de pantalla para personas
+                con discapacidad siendo penalizado por los diferentes buscadores.
+                Para evitar este inconveniente se simula un envoltorio compuesto
+                por un enlace que visualmente el usuario interprete que puede
+                presionar la imagen.
+            -->
+            <a [routerLink]="['/', superHero.id]" queryParamsHandling="merge"
+                [title]="superHero.name">{{superHero.name}}</a>
+
+            <figure class="card-img-top">
+                <img data-sizes="auto" data-srcset="{{superHero.imagesLazySizes()}}" class="lazyload"
+                    alt="{{superHero.name}}" />
+                <figcaption>{{superHero.name}}</figcaption>
+            </figure>
+
+            <div class="card-body">
+                <ul>
+                    <li>Intelligence: <strong>{{superHero.powerstats.intelligence || 'N'}}</strong></li>
+                    <li>Speed: <strong>{{superHero.powerstats.speed || 'N'}}</strong></li>
+                    <li>Power: <strong>{{superHero.powerstats.power || 'N'}}</strong></li>
+                    <li>Gender: <strong>{{superHero.appearance.gender || 'N'}}</strong></li>
+                    <li>Race: <strong>{{superHero.appearance.race || 'N'}}</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
