@@ -1,9 +1,9 @@
-export const environment = {
+ export const environment = {
   production: false,
 };
 const SUPERHERO_URL_API: string = 'https://raw.githubusercontent.com/akabab/superhero-api/0.2.0/api/'
-
-export const SUPERHERO: { [key: string]: { [key: string]: string | { [key: string]: string } } } = {
+//{ [key: string]: { [key: string]: string | { [key: string]: string } } } 
+export const SUPERHERO= {
   CONFIGURATION: {
     TITLE: 'DEV - ECON',
     LIST: {
@@ -12,6 +12,6 @@ export const SUPERHERO: { [key: string]: { [key: string]: string | { [key: strin
   },
   RESOURCE: {
     LIST: `${SUPERHERO_URL_API}all.json`,
-    ID: `${SUPERHERO_URL_API}id/#{ID}.json`
+    ID: `${SUPERHERO_URL_API}id/`,
   }
 };

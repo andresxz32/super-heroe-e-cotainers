@@ -1,12 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Observable, BehaviorSubject, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { ParamMap, ActivatedRoute } from '@angular/router';
-
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SuperHeroService } from '../../services/serviceHeroe';
 import { SuperHeroModel } from '../../shared/models/superHeroModel';
-import { Title, Meta } from '@angular/platform-browser';
-import { SUPERHERO } from '../../../environments/environment';
+import { makeStateKey, TransferState } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
+const SUPERHEROES_RANDOM_IDS_KEY = makeStateKey('superHeroesIds');
+export const NUMBER_SUPERHEROES_FOR_LIST: number = 20;
 
 @Component({
   selector: 'app-superhero-list',
@@ -14,55 +12,41 @@ import { SUPERHERO } from '../../../environments/environment';
   styleUrls: ['./list.component.scss']
 })
 export class SuperHeroListComponent implements OnInit, OnDestroy {
-  private _activatedRouteQueryParamFilterSubscription$: Subscription
-  private _superHeroesBehaviorSubject$: BehaviorSubject<SuperHeroModel[]> = new BehaviorSubject(null)
-  superHeroes$: Observable<SuperHeroModel[]> = this._superHeroesBehaviorSubject$.asObservable()
-
+  public suscript: Subscription;
+  public superHeroes: SuperHeroModel[] = [];
   constructor(
     private _superHeroService: SuperHeroService,
-    private _title: Title,
-    private _meta: Meta,
-    private _activatedRoute: ActivatedRoute
-  ) { }
+    private _state: TransferState,
+  ) { 
+  }
 
-  ngOnInit(): void {
-    this.startActivatedRouteQueryParamFilterSubscription()
+
+  ngOnInit() {
+    this.getHeroes();
+
+  }
+  //
+  getHeroes() {
+    for (let i = 0; i <= NUMBER_SUPERHEROES_FOR_LIST; i++) {
+      let index = Math.floor(Math.random() * 563);
+      this.suscript = this._superHeroService.getHeroes(index).subscribe(
+        (data: any) => {
+          if (data) {
+            this.superHeroes.push(data);
+            console.log(this.superHeroes);
+          }
+          this._state.set<SuperHeroModel[]>(SUPERHEROES_RANDOM_IDS_KEY, null);
+        },
+        err => {
+        }
+      )
+    }
   }
 
   ngOnDestroy(): void {
-    this._superHeroesBehaviorSubject$.unsubscribe()
-    this._activatedRouteQueryParamFilterSubscription$.unsubscribe()
-  }
+    if (this.suscript) {
+      this.suscript.unsubscribe();
+    }
 
-  private startActivatedRouteQueryParamFilterSubscription(): void {
-    this._activatedRouteQueryParamFilterSubscription$ = this._activatedRoute.queryParamMap.pipe(
-      map((paramMap: ParamMap) => paramMap.get('filter'))
-    ).subscribe((filter: string) => this.list(filter))
-  }
-
-  list(filter: string = null): void {
-    const random: boolean = filter ? false : true
-    this._superHeroService.list(filter, random)
-      .subscribe(
-        (superHeroes: SuperHeroModel[]) => {
-          this._title.setTitle(`${(<{ [key: string]: string }>SUPERHERO.CONFIGURATION.LIST).TITLE} / ${SUPERHERO.CONFIGURATION.TITLE}`)
-
-          this._meta.updateTag({
-            name: 'description',
-            content: superHeroes.reduce((description: string, superHero: SuperHeroModel) => `${superHero.name}, ${description} `, '')
-          })
-
-          this._meta.updateTag({
-            name: 'keywords',
-            content: superHeroes.reduce((keywords: string, superHero: SuperHeroModel) => `${superHero.name},${keywords} `, '')
-          })
-
-          this._superHeroesBehaviorSubject$.next(superHeroes)
-        }
-      )
-  }
-
-  trackByFunction(superHeroModel: SuperHeroModel): number {
-    return superHeroModel.id
   }
 }
